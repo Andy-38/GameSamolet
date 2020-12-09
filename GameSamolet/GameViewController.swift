@@ -31,7 +31,7 @@ class GameViewController: UIViewController {
         //сначала корневая(рут) нода, потом остальные
         
         // размещаем в пространстве ноду с камерой, задаем ей координаты
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 15)
+        cameraNode.position = SCNVector3(x: 0, y: 0, z: 60)
         
         // создаем точечный источник света, он висит в пространстве по координатам
         let lightNode = SCNNode()
@@ -45,6 +45,8 @@ class GameViewController: UIViewController {
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient //тип = фоновый
         ambientLightNode.light!.color = UIColor.init(red: 135/255, green: 206/255, blue: 235/255, alpha: 0) // цвет подсветки = небесно-голубой
+        // ambientLightNode.light!.color = UIColor.init(red: 0, green: 1, blue: 0, alpha: 0)
+        // цвет подсветки = зеленый
         scene.rootNode.addChildNode(ambientLightNode)
         
         // находим на сцене ноду с именем "ship" и присваиваем ее константе ship
@@ -52,7 +54,8 @@ class GameViewController: UIViewController {
         
         // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
-        ship.runAction(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1))
+        // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
+        ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 50, duration: 15))
         
         // говорим что view у viewController'a будет не просто пряугольник, а 3d-сцена
         let scnView = self.view as! SCNView
