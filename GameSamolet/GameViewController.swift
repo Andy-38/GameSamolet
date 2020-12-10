@@ -11,6 +11,23 @@ import SceneKit
 
 class GameViewController: UIViewController {
 
+    // MARK: - Methods
+    func getShip() -> SCNNode {
+        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
+        return ship.clone()
+    }
+    
+    class func loadFromFileToSCNNode(filepath:String) -> SCNNode { //функция для загрузки объекта из файла
+        let node = SCNNode()
+        let scene = SCNScene(named: filepath)
+        let nodeArray = scene!.rootNode.childNodes
+        for childNode in nodeArray {
+            node.addChildNode(childNode as SCNNode)
+        }
+        return node
+    }
+    
     override func viewDidLoad() {
         // override перезаписывает родительскую функцию
         //viewDidLoad запускается после создания главного ViewController'a
@@ -19,6 +36,7 @@ class GameViewController: UIViewController {
         
         // создаем сцену на основе модели ship.scn
         let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        //let scene = SCNScene(named: "art.scnassets/TAL16OBJ.dae")!
         // let задает константу
         // ! значит, что константа scene точно не равняется nil и не надо это проверять
         
@@ -51,11 +69,18 @@ class GameViewController: UIViewController {
         
         // находим на сцене ноду с именем "ship" и присваиваем ее константе ship
         let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
+        //let ship = scene.rootNode.childNode(withName: "node", recursively: true)!
+        
+        // грузим второй самолет из файла
+        let ship38 = GameViewController.loadFromFileToSCNNode(filepath: "art.scnassets/TAL16OBJ.dae")
+        scene.rootNode.addChildNode(ship38) // добавляем ноду с самолетом38
+        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) // поворачиваем его как надо
+        ship38.runAction(SCNAction.moveBy(x: 0, y: 0, z: -5, duration: 0)) // и сдвигаем
         
         // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
         // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
-        ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 50, duration: 15))
+        ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
         
         // говорим что view у viewController'a будет не просто пряугольник, а 3d-сцена
         let scnView = self.view as! SCNView
@@ -113,6 +138,7 @@ class GameViewController: UIViewController {
         }
     }
     
+    // MARK: - Compute Properties
     override var shouldAutorotate: Bool {
         return true
     }
