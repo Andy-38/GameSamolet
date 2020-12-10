@@ -10,11 +10,15 @@
 import SceneKit
 
 class GameViewController: UIViewController {
-
+    
+    // MARK: - Stored Properties
+    //var scene: SCNScene? //scene - переменная типа SCNScene. Знак "?" значит что изначально она равна nil т.е. ничего
+    var scene: SCNScene! //scene - переменная типа SCNScene. Знак "!" значит что ей точно будет присвоено значение, но позже
+    
     // MARK: - Methods
     /// Создает новый объект из сцены
     /// - Returns: SCNNode with object
-    func getShip(filepath:String, nodeName:String) -> SCNNode {
+    func getShip(filepath: String, nodeName: String) -> SCNNode {
         // создаем сцену на основе модели ship.scn
         let scene = SCNScene(named: filepath)!
         // находим на сцене ноду с именем nodeName и присваиваем ее константе ship
@@ -22,14 +26,18 @@ class GameViewController: UIViewController {
         return ship.clone()
     }
     
-    class func loadFromFileToSCNNode(filepath:String) -> SCNNode { //функция для загрузки объекта из файла
-        let node = SCNNode()
-        let scene = SCNScene(named: filepath)
-        let nodeArray = scene!.rootNode.childNodes
-        for childNode in nodeArray {
-            node.addChildNode(childNode as SCNNode)
-        }
-        return node
+//    class func loadFromFileToSCNNode(filepath:String) -> SCNNode { //функция для загрузки объекта из файла
+//        let node = SCNNode()
+//        let scene = SCNScene(named: filepath)
+//        let nodeArray = scene!.rootNode.childNodes
+//        for childNode in nodeArray {
+//            node.addChildNode(childNode as SCNNode)
+//        }
+//        return node
+    //    }
+    /// Находит и удаляет объект с именем nodeName со сцены
+    func removeShip(nodeName: String) {
+        scene.rootNode.childNode(withName: nodeName, recursively: true)?.removeFromParentNode()
     }
     
     override func viewDidLoad() {
@@ -39,10 +47,11 @@ class GameViewController: UIViewController {
         //super вызывает не перезаписанную функцию из родительского класса
         
         // создаем сцену на основе модели ship.scn
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        scene = SCNScene(named: "art.scnassets/ship.scn")!
         //let scene = SCNScene(named: "art.scnassets/TAL16OBJ.dae")!
         // let задает константу
         // ! значит, что константа scene точно не равняется nil и не надо это проверять
+        removeShip(nodeName: "ship") //удаляем со сцены изначальный самолет
         
         // создаем и добавляем камеру на сцену
         let cameraNode = SCNNode() // создаем ноду(узел) она сама по себе невидима
@@ -95,7 +104,7 @@ class GameViewController: UIViewController {
         
         // добавляем первый самолет на сцену
         let ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship")
-        scnView.scene?.rootNode.addChildNode(ship)
+        scene.rootNode.addChildNode(ship)
         
         // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
@@ -111,6 +120,7 @@ class GameViewController: UIViewController {
         ship38.position = SCNVector3 (x: 0, y: 0, z: -10) // и сдвигаем
     }
     
+    // MARK: - Actions
     @objc
     func handleTap(_ gestureRecognize: UIGestureRecognizer) {
         // retrieve the SCNView
