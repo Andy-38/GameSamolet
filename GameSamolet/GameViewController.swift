@@ -12,9 +12,13 @@ import SceneKit
 class GameViewController: UIViewController {
 
     // MARK: - Methods
-    func getShip() -> SCNNode {
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
+    /// Создает новый объект из сцены
+    /// - Returns: SCNNode with object
+    func getShip(filepath:String, nodeName:String) -> SCNNode {
+        // создаем сцену на основе модели ship.scn
+        let scene = SCNScene(named: filepath)!
+        // находим на сцене ноду с именем nodeName и присваиваем ее константе ship
+        let ship = scene.rootNode.childNode(withName: nodeName, recursively: true)!
         return ship.clone()
     }
     
@@ -68,19 +72,7 @@ class GameViewController: UIViewController {
         scene.rootNode.addChildNode(ambientLightNode)
         
         // находим на сцене ноду с именем "ship" и присваиваем ее константе ship
-        let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
-        //let ship = scene.rootNode.childNode(withName: "node", recursively: true)!
-        
-        // грузим второй самолет из файла
-        let ship38 = GameViewController.loadFromFileToSCNNode(filepath: "art.scnassets/TAL16OBJ.dae")
-        scene.rootNode.addChildNode(ship38) // добавляем ноду с самолетом38
-        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) // поворачиваем его как надо
-        ship38.runAction(SCNAction.moveBy(x: 0, y: 0, z: -5, duration: 0)) // и сдвигаем
-        
-        // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
-        // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
-        // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
-        ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
+        //let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
         
         // говорим что view у viewController'a будет не просто пряугольник, а 3d-сцена
         let scnView = self.view as! SCNView
@@ -100,6 +92,23 @@ class GameViewController: UIViewController {
         // перехватываем жесты нажатия на самолет и вызываем handleTap при нажатии
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         scnView.addGestureRecognizer(tapGesture) // добавляем распознаватель жестов
+        
+        // добавляем первый самолет на сцену
+        let ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship")
+        scnView.scene?.rootNode.addChildNode(ship)
+        
+        // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
+        // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
+        // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
+        // ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
+        ship.position = SCNVector3 (x: 0, y: 0, z: 10)
+        
+        // грузим второй самолет из файла
+        //let ship38 = GameViewController.loadFromFileToSCNNode(filepath: "art.scnassets/TAL16OBJ.dae")
+        let ship38 = getShip (filepath: "art.scnassets/TAL16OBJ.dae", nodeName: "node")
+        scene.rootNode.addChildNode(ship38) // добавляем ноду с самолетом38
+        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) // поворачиваем его как надо
+        ship38.position = SCNVector3 (x: 0, y: 0, z: -10) // и сдвигаем
     }
     
     @objc
