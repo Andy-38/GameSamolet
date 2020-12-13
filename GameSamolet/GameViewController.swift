@@ -11,11 +11,28 @@ import SceneKit
 
 class GameViewController: UIViewController {
     
+    // MARK: - Outlets
+    let button = UIButton()
+    
+    
     // MARK: - Stored Properties
     //var scene: SCNScene? //scene - переменная типа SCNScene. Знак "?" значит что изначально она равна nil т.е. ничего
     var scene: SCNScene! //scene - переменная типа SCNScene. Знак "!" значит что ей точно будет присвоено значение, но позже
+    var scnView: SCNView!
     
     // MARK: - Methods
+    // функция для добавления кнопки
+    func addButton() {
+        let width: CGFloat = 200
+        let height: CGFloat = 100
+        button.frame = CGRect(x: scnView.frame.midX - width/2, y: scnView.frame.midY - height/2, width: width, height: height)
+        button.setTitle("Restart", for: .normal) //текст на кнопке и состояние кнопки
+        button.backgroundColor = .red
+        button.layer.cornerRadius = 16
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
+        scnView.addSubview(button)
+    }
+    
     /// Создает новый объект из сцены
     /// - Returns: SCNNode with object
     func getShip(filepath: String, nodeName: String) -> SCNNode {
@@ -62,7 +79,7 @@ class GameViewController: UIViewController {
         //сначала корневая(рут) нода, потом остальные
         
         // размещаем в пространстве ноду с камерой, задаем ей координаты
-        cameraNode.position = SCNVector3(x: 0, y: 0, z: 60)
+        cameraNode.position = SCNVector3(x: 0, y: 0, z: 10)
         
         // создаем точечный источник света, он висит в пространстве по координатам
         let lightNode = SCNNode()
@@ -84,7 +101,7 @@ class GameViewController: UIViewController {
         //let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
         
         // говорим что view у viewController'a будет не просто пряугольник, а 3d-сцена
-        let scnView = self.view as! SCNView
+        scnView = self.view as? SCNView
         
         // и указываем какая именно (ранее созданная)
         scnView.scene = scene
@@ -105,19 +122,32 @@ class GameViewController: UIViewController {
         // добавляем первый самолет на сцену
         let ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship")
         scene.rootNode.addChildNode(ship)
+        ship.position = SCNVector3 (x: 25, y: 25, z: -100) //задаем позицию
+        // анимация
+        //ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
+        ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+        ship.look(at: SCNVector3(2*25, 2*25, 2*(-100)))
         
         // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
         // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
         // ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
-        ship.position = SCNVector3 (x: 0, y: 0, z: 10)
+        
         
         // грузим второй самолет из файла
         //let ship38 = GameViewController.loadFromFileToSCNNode(filepath: "art.scnassets/TAL16OBJ.dae")
         let ship38 = getShip (filepath: "art.scnassets/TAL16OBJ.dae", nodeName: "node")
         scene.rootNode.addChildNode(ship38) // добавляем ноду с самолетом38
         ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) // поворачиваем его как надо
-        ship38.position = SCNVector3 (x: 0, y: 0, z: -10) // и сдвигаем
+        ship38.position = SCNVector3 (x: -25, y: 25, z: -100) // и сдвигаем
+        // анимация
+        //ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
+        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+        ship38.look(at: SCNVector3(2*(-25), 2*25, 2*(-100)))
+        
+        // Добавляем кнопку
+        addButton()
+        
     }
     
     // MARK: - Actions
