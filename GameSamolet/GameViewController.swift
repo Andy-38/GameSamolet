@@ -22,6 +22,7 @@ class GameViewController: UIViewController {
     var ship: SCNNode!
     var ship38: SCNNode!
     var startRotate: SCNVector4! // изначальный поворот кривой модели
+    let depth: Int = -80 // Глубина 3D
     
     // MARK: - Methods
     /// Добавляем кнопку Restart
@@ -41,7 +42,7 @@ class GameViewController: UIViewController {
     }
     
     /// Добавляем самолет на сцену
-    func addShip (ship: SCNNode, x: Float, y: Float, z: Float){
+    func addShip (ship: SCNNode, x: Int, y: Int, z: Int){
         scene.rootNode.addChildNode(ship) // добавляем на сцену
         ship.position = SCNVector3 (x, y, z) //задаем позицию
         ship.look(at: SCNVector3(2*x, 2*y, 2*z)) // задаем направление куда смотрит модель
@@ -77,8 +78,10 @@ class GameViewController: UIViewController {
         //ship38.removeFromParentNode() // убираем самолет 38
         removeShip(nodeName: "ship") // убираем самолет
         removeShip(nodeName: "node") // убираем самолет 38
-        addShip(ship: ship, x: 25.0, y: 25.0, z: -100.0)
-        addShip(ship: ship38, x: -25.0, y: 25.0, z: -100.0)
+        let x = Int.random(in: 0 ... 30)
+        let y = Int.random(in: -30 ... 30)
+        addShip(ship: ship, x: x, y: y, z: depth)
+        addShip(ship: ship38, x: -x, y: y, z: depth)
         ship38.rotation = startRotate // поворачиваем кривую модель
         ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
@@ -153,7 +156,7 @@ class GameViewController: UIViewController {
         scnView.addGestureRecognizer(tapGesture) // добавляем распознаватель жестов
         
         ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
-        addShip(ship: ship, x: 25.0, y: 25.0, z: -100.0) // добавляем на сцену
+        addShip(ship: ship, x: 25, y: 25, z: depth) // добавляем на сцену
         // анимация
         // ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
         
@@ -170,7 +173,7 @@ class GameViewController: UIViewController {
         // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
         
         ship38 = getShip (filepath: "art.scnassets/TAL16OBJ.dae", nodeName: "node") // грузим второй самолет из файла
-        addShip(ship: ship38, x: -25.0, y: 25.0, z: -100.0) // и добавляем на сцену
+        addShip(ship: ship38, x: -25, y: 25, z: depth) // и добавляем на сцену
         ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
             self.startRotate = self.ship38.rotation }
         // анимация
