@@ -21,6 +21,7 @@ class GameViewController: UIViewController {
     var scnView: SCNView!
     var ship: SCNNode!
     var ship38: SCNNode!
+    var startRotate: SCNVector4! // изначальный поворот кривой модели
     
     // MARK: - Methods
     /// Добавляем кнопку Restart
@@ -43,8 +44,6 @@ class GameViewController: UIViewController {
     func addShip (ship: SCNNode, x: Float, y: Float, z: Float){
         scene.rootNode.addChildNode(ship) // добавляем на сцену
         ship.position = SCNVector3 (x, y, z) //задаем позицию
-//        if ship.name == "node" { // если модель кривая, то поворачиваем ее как надо
-//            ship.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0))}
         ship.look(at: SCNVector3(2*x, 2*y, 2*z)) // задаем направление куда смотрит модель
     }
     
@@ -80,14 +79,13 @@ class GameViewController: UIViewController {
         removeShip(nodeName: "node") // убираем самолет 38
         addShip(ship: ship, x: 25.0, y: 25.0, z: -100.0)
         addShip(ship: ship38, x: -25.0, y: 25.0, z: -100.0)
-        //ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0))
+        ship38.rotation = startRotate // поворачиваем кривую модель
         ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
                 self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
             }
         }
-        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0))
         ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
     }
     
@@ -104,7 +102,6 @@ class GameViewController: UIViewController {
         
         // создаем сцену на основе модели ship.scn
         scene = SCNScene(named: "art.scnassets/ship.scn")!
-        //let scene = SCNScene(named: "art.scnassets/TAL16OBJ.dae")!
         // let задает константу
         // ! значит, что константа scene точно не равняется nil и не надо это проверять
         removeShip(nodeName: "ship") //удаляем со сцены изначальный самолет
@@ -136,9 +133,6 @@ class GameViewController: UIViewController {
         // цвет подсветки = зеленый
         scene.rootNode.addChildNode(ambientLightNode)
         
-        // находим на сцене ноду с именем "ship" и присваиваем ее константе ship
-        //let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
-        
         // говорим что view у viewController'a будет не просто пряугольник, а 3d-сцена
         scnView = self.view as? SCNView
         
@@ -149,7 +143,7 @@ class GameViewController: UIViewController {
         scnView.allowsCameraControl = true
         
         // показываем FramePerSecond (FPS), время и прочую статистику
-        // scnView.showsStatistics = true
+        scnView.showsStatistics = false
         
         // цвет фона (но он тут заслоняется готовой сценой с самолетом)
         scnView.backgroundColor = UIColor.black
@@ -161,7 +155,6 @@ class GameViewController: UIViewController {
         ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
         addShip(ship: ship, x: 25.0, y: 25.0, z: -100.0) // добавляем на сцену
         // анимация
-        //ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
         // ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
         
         // {} после функции - это замыкание, функция без имени, вызываемая после окончания функции runAction
@@ -175,16 +168,12 @@ class GameViewController: UIViewController {
         // задаем анимацию (вращение) = постоянное, вдоль оси у на 2 радиана за 1 секунду
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
         // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
-        // ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
         
-        
-        
-        //let ship38 = GameViewController.loadFromFileToSCNNode(filepath: "art.scnassets/TAL16OBJ.dae")
         ship38 = getShip (filepath: "art.scnassets/TAL16OBJ.dae", nodeName: "node") // грузим второй самолет из файла
         addShip(ship: ship38, x: -25.0, y: 25.0, z: -100.0) // и добавляем на сцену
-        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) // поворачиваем его как надо
+        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
+            self.startRotate = self.ship38.rotation }
         // анимация
-        //ship.runAction(SCNAction.moveBy(x: 0, y: 0, z: 10, duration: 5))
         ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
         
         // Добавляем кнопку Restart
