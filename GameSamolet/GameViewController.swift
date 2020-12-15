@@ -21,7 +21,7 @@ class GameViewController: UIViewController {
     var scnView: SCNView!
     var ship: SCNNode!
     var ship38: SCNNode!
-    var startRotate: SCNVector4! // изначальный поворот кривой модели
+    // var startRotate: SCNVector4! // изначальный поворот кривой модели
     let depth: Int = -80 // Глубина 3D
     
     // MARK: - Methods
@@ -82,7 +82,7 @@ class GameViewController: UIViewController {
         let y = Int.random(in: -30 ... 30)
         addShip(ship: ship, x: x, y: y, z: depth)
         addShip(ship: ship38, x: -x, y: y, z: depth)
-        ship38.rotation = startRotate // поворачиваем кривую модель
+        //ship38.rotation = startRotate // поворачиваем кривую модель
         ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
@@ -172,10 +172,10 @@ class GameViewController: UIViewController {
         // ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
         // ship.runAction(SCNAction.rotateBy(x: 0, y: CGFloat.pi, z: 0, duration: 1))
         
-        ship38 = getShip (filepath: "art.scnassets/TAL16OBJ.dae", nodeName: "node") // грузим второй самолет из файла
+        ship38 = getShip (filepath: "art.scnassets/TAL38OBJ.dae", nodeName: "node") // грузим второй самолет из файла
         addShip(ship: ship38, x: -25, y: 25, z: depth) // и добавляем на сцену
-        ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
-            self.startRotate = self.ship38.rotation }
+        //ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
+        //    self.startRotate = self.ship38.rotation }
         // анимация
         ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
         
