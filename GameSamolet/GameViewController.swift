@@ -204,6 +204,7 @@ class GameViewController: UIViewController {
             
             // получаем имя подсвеченной ноды
             nodeName = result.node.name
+            if nodeName == "shipMesh" { nodeName = "ship"}
             
             // подсвечиваем объект
             SCNTransaction.begin()
@@ -218,19 +219,25 @@ class GameViewController: UIViewController {
                 
                 SCNTransaction.commit()
                 
-                self.removeShip(nodeName: "ship")
-                self.ship = self.getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
-                self.addShip(ship: self.ship, x: 25, y: 25, z: self.depth) // добавляем на сцену
+                self.removeShip(nodeName: nodeName)
+                print(nodeName)
+                if nodeName == "ship" {
+                    self.ship = self.getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
+                    let x = Int.random(in: 0 ... 30)
+                    let y = Int.random(in: -30 ... 30)
+                    self.addShip(ship: self.ship, x: x, y: y, z: self.depth) // добавляем на сцену
                 // анимация
                 // ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
                 
                 // {} после функции - это замыкание, функция без имени, вызываемая после окончания функции runAction
-                self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
+                    self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
                     //print(#line, #function) //для отладки выводим номер строки и функцию
                     DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
                         self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
+                        }
                     }
                 }
+                
             }
             
             material.emission.contents = UIColor.red // цвет подсветки - красный
