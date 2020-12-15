@@ -187,47 +187,66 @@ class GameViewController: UIViewController {
     // MARK: - Actions
     @objc
     func handleTap(_ gestureRecognize: UIGestureRecognizer) {
-        // retrieve the SCNView
+        // получаем ссылку на сцену
         let scnView = self.view as! SCNView
+        var nodeName: String!
         
-        // check what nodes are tapped
-        let p = gestureRecognize.location(in: scnView)
-        let hitResults = scnView.hitTest(p, options: [:])
-        // check that we clicked on at least one object
+        // проверяем что нода была нажата
+        let p = gestureRecognize.location(in: scnView) // нажатие было внутри сцены?
+        let hitResults = scnView.hitTest(p, options: [:]) // результат нажатия, массив
+        // проверяем что был нажат как минимум 1 объект
         if hitResults.count > 0 {
-            // retrieved the first clicked object
+            // получаем первый нажатый объект
             let result = hitResults[0]
             
-            // get its material
+            // получаем материал нажатого объект
             let material = result.node.geometry!.firstMaterial!
             
-            // highlight it
-            SCNTransaction.begin()
-            SCNTransaction.animationDuration = 0.5
+            // получаем имя подсвеченной ноды
+            nodeName = result.node.name
             
-            // on completion - unhighlight
+            // подсвечиваем объект
+            SCNTransaction.begin()
+            SCNTransaction.animationDuration = 0.5 // длительность анимации подсветки
+            
+            // когда закончится подсветка - вовзвращаем все как было
             SCNTransaction.completionBlock = {
                 SCNTransaction.begin()
-                SCNTransaction.animationDuration = 0.5
+                SCNTransaction.animationDuration = 0.5 // длительность анимации возвращения родного цвета
                 
-                material.emission.contents = UIColor.black
+                material.emission.contents = UIColor.black // цвет черный?
                 
                 SCNTransaction.commit()
+                
+                self.removeShip(nodeName: "ship")
+                self.ship = self.getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
+                self.addShip(ship: self.ship, x: 25, y: 25, z: self.depth) // добавляем на сцену
+                // анимация
+                // ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+                
+                // {} после функции - это замыкание, функция без имени, вызываемая после окончания функции runAction
+                self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
+                    //print(#line, #function) //для отладки выводим номер строки и функцию
+                    DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
+                        self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
+                    }
+                }
             }
             
-            material.emission.contents = UIColor.red
+            material.emission.contents = UIColor.red // цвет подсветки - красный
             
             SCNTransaction.commit()
         }
+        //self.removeShip(nodeName: nodeName)
     }
     
     // MARK: - Compute Properties
-    override var shouldAutorotate: Bool {
+    override var shouldAutorotate: Bool { // поворот сцены вместе с поворотом экрана телефона
         return true
     }
     
-    override var prefersStatusBarHidden: Bool {
-        return true
+    override var prefersStatusBarHidden: Bool { //скрыть статус-бар
+        return false
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
