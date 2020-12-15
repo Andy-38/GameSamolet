@@ -80,16 +80,22 @@ class GameViewController: UIViewController {
         removeShip(nodeName: "node") // убираем самолет 38
         let x = Int.random(in: 0 ... 30)
         let y = Int.random(in: -30 ... 30)
+        ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship")
         addShip(ship: ship, x: x, y: y, z: depth)
+        ship38 = getShip (filepath: "art.scnassets/TAL38OBJ.dae", nodeName: "node")
         addShip(ship: ship38, x: -x, y: y, z: depth)
         //ship38.rotation = startRotate // поворачиваем кривую модель
         ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
                 self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
+                self.removeShip(nodeName: "node") // убираем с экрана сторой самолет, чтоб не мешал
             }
         }
-        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
+            DispatchQueue.main.async {self.button.isHidden = false} // делаем кнопку видимой когда самолет долетел
+            self.removeShip(nodeName: "ship") // убираем с экрана сторой самолет, чтоб не мешал
+            }
     }
     
     /// Находит и удаляет объект с именем nodeName со сцены
@@ -165,6 +171,7 @@ class GameViewController: UIViewController {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
                 self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
+                self.removeShip(nodeName: "node") // убираем с экрана сторой самолет, чтоб не мешал
             }
             
         }
@@ -177,7 +184,13 @@ class GameViewController: UIViewController {
         //ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
         //    self.startRotate = self.ship38.rotation }
         // анимация
-        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+        //ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
+        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
+            DispatchQueue.main.async {
+                self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
+                self.removeShip(nodeName: "ship") // убираем с экрана сторой самолет, чтоб не мешал
+            }
+        }
         
         // Добавляем кнопку Restart
         addRestartButton()
@@ -189,58 +202,60 @@ class GameViewController: UIViewController {
     func handleTap(_ gestureRecognize: UIGestureRecognizer) {
         // получаем ссылку на сцену
         let scnView = self.view as! SCNView
-        var nodeName: String!
+        var nodeName: String! // имя нажимаемой ноды
         
         // проверяем что нода была нажата
-        let p = gestureRecognize.location(in: scnView) // нажатие было внутри сцены?
-        let hitResults = scnView.hitTest(p, options: [:]) // результат нажатия, массив
-        // проверяем что был нажат как минимум 1 объект
+        let p = gestureRecognize.location(in: scnView) // нажатие было внутри сцены? получаем координаты x,y касания пальцем на двухмерном экране
+        let hitResults = scnView.hitTest(p, options: [:]) // результат нажатия, массив объектов. Если провести воображаемый луч от глаза пользователя через точку касания на экране вглубь сцены, в массив попадают по порядку все объекты через которые проходит луч вглубь сцены
+        // проверяем что получился как минимум 1 объект
         if hitResults.count > 0 {
-            // получаем первый нажатый объект
+            // получаем первый нажатый объект, ближний к пользователю
             let result = hitResults[0]
             
-            // получаем материал нажатого объект
+            // получаем материал этого нажатого объекта
             let material = result.node.geometry!.firstMaterial!
             
             // получаем имя подсвеченной ноды
             nodeName = result.node.name
-            if nodeName == "shipMesh" { nodeName = "ship"}
+            if nodeName == "shipMesh" { nodeName = "ship"} // у модели самолета почему то две ноды ship и shipMesh
             
             // подсвечиваем объект
             SCNTransaction.begin()
-            SCNTransaction.animationDuration = 0.5 // длительность анимации подсветки
+            SCNTransaction.animationDuration = 0.2 // длительность анимации подсветки
             
             // когда закончится подсветка - вовзвращаем все как было
             SCNTransaction.completionBlock = {
-                SCNTransaction.begin()
-                SCNTransaction.animationDuration = 0.5 // длительность анимации возвращения родного цвета
+//                SCNTransaction.begin()
+//                SCNTransaction.animationDuration = 0.5 // длительность анимации возвращения родного цвета
+//
+//                material.emission.contents = UIColor.black // emission - свойство материала, показывающее, насколько этот материал излучает; цвет излучения черный, т.е. не излучает
+//
+//                SCNTransaction.commit()
                 
-                material.emission.contents = UIColor.black // цвет черный?
-                
-                SCNTransaction.commit()
-                
-                self.removeShip(nodeName: nodeName)
-                print(nodeName)
+                self.removeShip(nodeName: nodeName) // уничтожаем объект в который попали
+                //print(nodeName)
+                let x = Int.random(in: 0 ... 30)
+                let y = Int.random(in: -30 ... 30)
                 if nodeName == "ship" {
                     self.ship = self.getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
-                    let x = Int.random(in: 0 ... 30)
-                    let y = Int.random(in: -30 ... 30)
                     self.addShip(ship: self.ship, x: x, y: y, z: self.depth) // добавляем на сцену
-                // анимация
-                // ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10))
-                
-                // {} после функции - это замыкание, функция без имени, вызываемая после окончания функции runAction
                     self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
-                    //print(#line, #function) //для отладки выводим номер строки и функцию
-                    DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку надо показать в основном потоке
-                        self.button.isHidden = false // делаем кнопку видимой когда самолет долетел
-                        }
+                        DispatchQueue.main.async {self.button.isHidden = false} // делаем кнопку видимой когда самолет долетел
+                        self.removeShip(nodeName: "node") // убираем с экрана сторой самолет, чтоб не мешал
                     }
                 }
+                if nodeName == "node" {
+                    self.ship38 = self.getShip (filepath: "art.scnassets/TAL38OBJ.dae", nodeName: "node") // получаем модель самолета из файла
+                    self.addShip(ship: self.ship38, x: x, y: y, z: self.depth) // добавляем на сцену
+                    self.ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: 10)) {
+                        DispatchQueue.main.async {self.button.isHidden = false} // делаем кнопку видимой когда самолет долетел
+                        self.removeShip(nodeName: "ship") // убираем с экрана сторой самолет, чтоб не мешал
+                        }
+                }
                 
-            }
-            
-            material.emission.contents = UIColor.red // цвет подсветки - красный
+            } //конец завершающего блока анимации
+            // далее - начальный блок анимации
+            material.emission.contents = UIColor.red // цвет излучения материала - красный
             
             SCNTransaction.commit()
         }
