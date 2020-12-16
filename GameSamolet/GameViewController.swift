@@ -20,6 +20,7 @@ class GameViewController: UIViewController {
     //var scene: SCNScene? //scene - переменная типа SCNScene. Знак "?" значит что изначально она равна nil т.е. ничего
     var scene: SCNScene! //scene - переменная типа SCNScene. Знак "!" значит что ей точно будет присвоено значение, но позже
     var scnView: SCNView!
+    var speed: TimeInterval = 10 // скорость подлета самолетов (время в секундах)
     var score = 0 { // для подсчета сбитых самолетов
         didSet { // вызывается после изменения score
         // oldValue - старое значение
@@ -32,7 +33,6 @@ class GameViewController: UIViewController {
     var ship38: SCNNode!
     // var startRotate: SCNVector4! // изначальный поворот кривой модели
     let depth: Int = -90 // Глубина 3D
-    let speed: Int = 10 // скорость подлета самолетов (время в секундах)
     let maxX: Int = 30 // макс. координата по Х
     let maxY: Int = 30 // макс. координата по Y
     
@@ -106,6 +106,7 @@ class GameViewController: UIViewController {
         button.isHidden = true
         gameoverflag = false
         score = 0 // сбрасываем счетчик очков
+        speed = 10 // и скорость подлета
         //ship.removeFromParentNode() // убираем самолет
         //ship38.removeFromParentNode() // убираем самолет 38
         removeShip(nodeName: "ship") // убираем самолет
@@ -117,13 +118,13 @@ class GameViewController: UIViewController {
         ship38 = getShip (filepath: "art.scnassets/TAL38OBJ.dae", nodeName: "node")
         addShip(ship: ship38, x: -x, y: y, z: depth)
         //ship38.rotation = startRotate // поворачиваем кривую модель
-        ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(speed))) {
+        ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: speed)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку и текст надо показать в основном потоке
                 self.gameOver (nodname: "node")
             }
         }
-        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(speed))) {
+        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: speed)) {
             DispatchQueue.main.async {
                 self.gameOver (nodname: "ship")
             }
@@ -197,7 +198,7 @@ class GameViewController: UIViewController {
         addShip(ship: ship, x: maxX-5, y: maxY-5, z: depth) // добавляем на сцену
         // анимация
         // {} после функции - это замыкание, функция без имени, вызываемая после окончания функции runAction
-        ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(speed))) {
+        ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: speed)) {
             //print(#line, #function) //для отладки выводим номер строки и функцию
             DispatchQueue.main.async { //runAction по умолчанию запускается в дополнительном потоке на 10 сек, тут указываем что кнопку и текст надо показать в основном потоке
                 self.gameOver (nodname: "node") // если долетел - то gameover
@@ -211,7 +212,7 @@ class GameViewController: UIViewController {
         //ship38.runAction(SCNAction.rotateBy(x: -CGFloat.pi/2, y: 0, z: 0, duration: 0)) {// поворачиваем его как надо
         //    self.startRotate = self.ship38.rotation }
         // анимация
-        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(speed))) {
+        ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: speed)) {
             DispatchQueue.main.async {
                 self.gameOver (nodname: "ship") // если долетел - то gameover
             }
@@ -249,6 +250,7 @@ class GameViewController: UIViewController {
 //                material.emission.contents = UIColor.black // emission - свойство материала, показывающее, насколько этот материал излучает; цвет излучения черный, т.е. не излучает
 //                SCNTransaction.commit()
                 self.score+=1 // увелииваем очки при сбитии самолета
+                self.speed*=0.95 // увеличиваем скорость подлета самолета
                 self.removeShip(nodeName: nodeName) // уничтожаем объект в который попали
                 //print(nodeName)
                 let x = Int.random(in: -self.maxX ... self.maxX)
@@ -257,7 +259,7 @@ class GameViewController: UIViewController {
                 if nodeName == "ship" {
                     self.ship = self.getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
                     self.addShip(ship: self.ship, x: x, y: y, z: self.depth) // добавляем на сцену
-                    self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(self.speed))) {
+                    self.ship.runAction(.move(to: SCNVector3(0, 0, 0), duration: self.speed)) {
                         DispatchQueue.main.async {
                             self.gameOver (nodname: "node") // если долетел - то gameover
                         }
@@ -266,7 +268,7 @@ class GameViewController: UIViewController {
                 if nodeName == "node" {
                     self.ship38 = self.getShip (filepath: "art.scnassets/TAL38OBJ.dae", nodeName: "node") // получаем модель самолета из файла
                     self.addShip(ship: self.ship38, x: x, y: y, z: self.depth) // добавляем на сцену
-                    self.ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: TimeInterval(self.speed))) {
+                    self.ship38.runAction(.move(to: SCNVector3(0, 0, 0), duration: self.speed)) {
                         DispatchQueue.main.async {
                             self.gameOver (nodname: "ship") // если долетел - то gameover
                         }
