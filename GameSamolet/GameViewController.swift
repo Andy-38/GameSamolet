@@ -90,6 +90,7 @@ class GameViewController: UIViewController {
         // разрешаем пользователю вращать камеру
         scnView.allowsCameraControl = true
         button.isHidden = false // делаем кнопку видимой когда самолет долетел
+        scoreLabel.isHidden = true
         gameoverLabel.text = "Игра окончена!\n Очки: \(score)"
         gameoverLabel.isHidden = false // показываем надпись Конец игры
         gameoverflag = true // конец игры
@@ -129,6 +130,7 @@ class GameViewController: UIViewController {
         scnView.allowsCameraControl = false
         button.isHidden = true
         gameoverLabel.isHidden = true
+        scoreLabel.isHidden = false
         gameoverflag = false
         score = 0 // сбрасываем счетчик очков
         speed = 10 // и скорость подлета
