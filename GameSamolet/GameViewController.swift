@@ -89,9 +89,11 @@ class GameViewController: UIViewController {
     func gameOver (nodname: String){
         // разрешаем пользователю вращать камеру
         scnView.allowsCameraControl = true
+        //button.frame = CGRect(x: scnView.frame.midX - 100, y: scnView.frame.maxY - 50, width: 200, height: 40)
         button.isHidden = false // делаем кнопку видимой когда самолет долетел
         scoreLabel.isHidden = true
         gameoverLabel.text = "Игра окончена!\n Очки: \(score)"
+        //gameoverLabel.frame = CGRect(x: 0, y: 50, width: scnView.frame.width, height: 100)
         gameoverLabel.isHidden = false // показываем надпись Конец игры
         gameoverflag = true // конец игры
         removeShip(nodeName: nodname) // убираем с экрана сторой самолет, чтоб не мешал
@@ -125,8 +127,13 @@ class GameViewController: UIViewController {
         //print(cameraNode.rotation)
         //cameraNode.rotation = SCNVector4(0,0,0,1) // поворачиваем камеру в исходное положение
         //print(cameraNode.rotation)
-        print (cameraNode.eulerAngles)
+        //print (cameraNode.eulerAngles)
         // запрещаем пользователю вращать камеру
+        //print(scnView.defaultCameraController.target)
+        //scnView.defaultCameraController.target = SCNVector3(0,0,0)
+        
+        // создаем изначальную сцену
+        createScene()
         scnView.allowsCameraControl = false
         button.isHidden = true
         gameoverLabel.isHidden = true
@@ -165,12 +172,8 @@ class GameViewController: UIViewController {
         scene.rootNode.childNode(withName: nodeName, recursively: true)?.removeFromParentNode()
     }
     
-    override func viewDidLoad() {
-        // override перезаписывает родительскую функцию
-        //viewDidLoad запускается после создания главного ViewController'a
-        super.viewDidLoad()
-        //super вызывает не перезаписанную функцию из родительского класса
-        
+    /// Создает начальную сцену
+    func createScene() {
         // создаем сцену на основе модели ship.scn
         scene = SCNScene(named: "art.scnassets/ship.scn")!
         // let задает константу
@@ -187,9 +190,6 @@ class GameViewController: UIViewController {
         
         // размещаем в пространстве ноду с камерой, задаем ей координаты
         cameraNode.position = SCNVector3(x: 0, y: 0, z: 10)
-        print (cameraNode.eulerAngles)
-        //cameraNode.look(at: SCNVector3(0, 0, 0))
-        //cameraNode.orientation = SCNVector4(0,0,1,0)
         
         // создаем точечный источник света, он висит в пространстве по координатам
         let lightNode = SCNNode()
@@ -214,9 +214,6 @@ class GameViewController: UIViewController {
         // и указываем какая именно (ранее созданная)
         scnView.scene = scene
         
-        // запрещаем пользователю вращать камеру
-        scnView.allowsCameraControl = false
-        
         // показываем FramePerSecond (FPS), время и прочую статистику
         scnView.showsStatistics = false
         
@@ -226,6 +223,19 @@ class GameViewController: UIViewController {
         // перехватываем жесты нажатия на самолет и вызываем handleTap при нажатии
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         scnView.addGestureRecognizer(tapGesture) // добавляем распознаватель жестов
+    }
+    
+    override func viewDidLoad() {
+        // override перезаписывает родительскую функцию
+        //viewDidLoad запускается после создания главного ViewController'a
+        super.viewDidLoad()
+        //super вызывает не перезаписанную функцию из родительского класса
+        
+        // создаем изначальную сцену
+        createScene()
+        
+        // запрещаем пользователю вращать камеру
+        scnView.allowsCameraControl = false
         
         ship = getShip (filepath: "art.scnassets/ship.scn", nodeName: "ship") // получаем модель самолета из файла
         addShip(ship: ship, x: maxX-5, y: maxY-5, z: depth) // добавляем на сцену
@@ -315,6 +325,16 @@ class GameViewController: UIViewController {
             material.emission.contents = UIColor.red // цвет излучения материала - красный
             SCNTransaction.commit()
         }
+        }
+    }
+    
+    // вызывается при повороте устройства
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: nil) { _ in
+            // Your code here
+            self.button.frame = CGRect(x: self.scnView.frame.midX - 100, y: self.scnView.frame.maxY - 50, width: 200, height: 40)
+            self.gameoverLabel.frame = CGRect(x: 0, y: 50, width: self.scnView.frame.width, height: 100)
         }
     }
     
