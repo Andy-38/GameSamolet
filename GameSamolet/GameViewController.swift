@@ -332,7 +332,7 @@ class GameViewController: UIViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: nil) { _ in
-            // Your code here
+            // меняем расположение кнопок и надписей в зависимость от повотора экрана
             self.button.frame = CGRect(x: self.scnView.frame.midX - 100, y: self.scnView.frame.maxY - 50, width: 200, height: 40)
             self.gameoverLabel.frame = CGRect(x: 0, y: 50, width: self.scnView.frame.width, height: 100)
         }
