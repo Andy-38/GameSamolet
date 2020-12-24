@@ -288,7 +288,7 @@ class GameViewController: UIViewController {
             if nodeName == "shipMesh" { nodeName = "ship"} // у модели самолета почему то две ноды ship и shipMesh
             // подсвечиваем объект
             SCNTransaction.begin()
-            SCNTransaction.animationDuration = 0.2 // длительность анимации подсветки
+            SCNTransaction.animationDuration = 0.05 // длительность анимации подсветки
             // когда закончится подсветка - вовзвращаем все как было
             SCNTransaction.completionBlock = {
 //                SCNTransaction.begin()
